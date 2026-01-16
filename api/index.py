@@ -1,4 +1,5 @@
 import asyncio
+import json
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from downloader import download_video
@@ -27,20 +28,23 @@ async def handle_message(update: Update, context):
     else:
         await update.message.reply_document(video_bytes, filename='video.mp4')
 
-application.add_handler(CommandHandler('start', start))
-application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+if application:
+    application.add_handler(CommandHandler('start', start))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-def handler(request):
+def handler(event, context):
     if not TOKEN:
         return {'statusCode': 500, 'body': 'TELEGRAM_TOKEN not set'}
     try:
-        if request.method == 'POST':
-            if request.json:
-                update = Update.de_json(request.json, application.bot)
+        if event.get('httpMethod') == 'POST':
+            body = event.get('body', '')
+            if body:
+                data = json.loads(body)
+                update = Update.de_json(data, application.bot)
                 asyncio.run(application.process_update(update))
                 return {'statusCode': 200, 'body': 'ok'}
             else:
-                return {'statusCode': 400, 'body': 'No JSON'}
+                return {'statusCode': 400, 'body': 'No body'}
         else:
             return {'statusCode': 200, 'body': 'Bot is running'}
     except Exception as e:
