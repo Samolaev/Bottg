@@ -1,6 +1,14 @@
+<<<<<<< HEAD
 python-telegram-bot==20.7
 requests==2.31.0
 yt-dlp==2023.12.30
 beautifulsoup4==4.12.2
 lxml==4.9.3
+=======
+python-telegram-bot==20.7
+requests==2.31.0
+yt-dlp==2023.12.30
+beautifulsoup4==4.12.2
+lxml==4.9.3
+>>>>>>> c32efe91e6e2899318dd65bc9588f00242298925
 flask==3.0.0
