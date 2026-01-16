@@ -31,11 +31,14 @@ async def handle_message(update: Update, context):
 application.add_handler(CommandHandler('start', start))
 application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-@app.route('/', methods=['POST'])
+@app.route('/', methods=['GET', 'POST'])
 def webhook():
-    update = Update.de_json(request.get_json(force=True), application.bot)
-    application.process_update(update)
-    return 'ok'
+    if request.method == 'POST':
+        update = Update.de_json(request.get_json(force=True), application.bot)
+        application.process_update(update)
+        return 'ok'
+    else:
+        return 'Bot is running'
 
 if __name__ == '__main__':
     app.run()
