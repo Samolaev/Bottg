@@ -30,9 +30,15 @@ application.add_handler(CommandHandler('start', start))
 application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 def handler(request):
-    if request.method == 'POST':
-        update = Update.de_json(request.json, application.bot)
-        asyncio.run(application.process_update(update))
-        return {'statusCode': 200, 'body': 'ok'}
-    else:
-        return {'statusCode': 200, 'body': 'Bot is running'}
+    try:
+        if request.method == 'POST':
+            if request.json:
+                update = Update.de_json(request.json, application.bot)
+                asyncio.run(application.process_update(update))
+                return {'statusCode': 200, 'body': 'ok'}
+            else:
+                return {'statusCode': 400, 'body': 'No JSON'}
+        else:
+            return {'statusCode': 200, 'body': 'Bot is running'}
+    except Exception as e:
+        return {'statusCode': 500, 'body': str(e)}
