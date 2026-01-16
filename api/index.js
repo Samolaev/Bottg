@@ -1,5 +1,5 @@
 const TelegramBot = require('node-telegram-bot-api');
-const { downloadVideo } = require('../../downloader');
+const { downloadVideo } = require('../downloader');
 
 const token = process.env.TELEGRAM_TOKEN;
 if (!token) {
@@ -7,8 +7,6 @@ if (!token) {
 }
 
 const bot = new TelegramBot(token);
-
-bot.setWebHook(`${process.env.VERCEL_URL}/api/webhook`);
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
