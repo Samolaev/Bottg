@@ -1,34 +1,29 @@
-# Telegram Bot Vercel Boilerplate
+# Telegram bot
 
-Telegram Bot Vercel Boilerplate based on Node.js and [Telegraf](https://github.com/telegraf/telegraf) framework.
+A test telegram bot which is deployed to Vercel. See my blog post on it:
 
-This template inspired by [Telegram Bot Boilerplate](https://github.com/yakovlevyuri/telegram-bot-boilerplate) for easily deploy to [Vercel](https://vercel.com).
+[https://marclittlemore.com/serverless-telegram-chatbot-vercel](https://marclittlemore.com/serverless-telegram-chatbot-vercel/)
 
-[![Live Demo](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@7rodma/deploy-a-serverless-telegram-chatbot-using-vercel-57665d942a58)
+## Installing
 
-## Before you start
+Clone this repository into a new directory and install the dependencies:
 
-First rename `.env-sample` file to `.env` and fill in all necessary values.
-
-```
-BOT_TOKEN="<YOUR_BOT_API_TOKEN>"
-```
-
-## Start your local server
-
-```
-yarn
-yarn dev
+```bash
+git clone git@github.com:MarcL/telegram-test-bot.git
+cd telegram-test-bot
+npm install
 ```
 
-## Production
+## Deploying to Vercel
 
-You can fork this template and do the necessary changes you need. Then you when are done with your changes simply goto [vercel git import](https://vercel.com/import/git).
+Install the Vercel command line tools using `npm`:
 
-Reference to [this update](https://vercel.com/docs/security/deployment-protection#migrating-to-standard-protection), you need turn off `Vercel Authentication`, Settings => Deployment Protection
+```bash
+npm install -g vercel
+```
 
-Feel free to create PR!
+Deploy the project to your Vercel account:
 
-## Demo
-
-You can see a working version of the bot at [@Node_api_m_bot](https://t.me/Node_api_m_bot)
+```bash
+vercel
+```
