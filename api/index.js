@@ -1,52 +1,64 @@
 // api/index.js
 const { Telegraf } = require('telegraf');
 
-// Проверка токена
 const token = process.env.TELEGRAM_TOKEN;
 if (!token) {
-  console.error('❌ TELEGRAM_TOKEN is missing in environment variables!');
+  console.error('❌ TELEGRAM_TOKEN is missing!');
   throw new Error('TELEGRAM_TOKEN is required');
 }
 
-// Создаём бота
 const bot = new Telegraf(token);
 
-// Обрабатываем текстовые сообщения
 bot.on('text', async (ctx) => {
   const text = ctx.message.text;
   const message = `✅ Thanks for your message: *"${text}"*\nHave a great day! 👋🏻`;
   await ctx.replyWithMarkdown(message);
 });
 
-// Обработка ошибок
-bot.catch((err, ctx) => {
-  console.error(`⚠️ Error while processing update ${ctx?.update?.update_id}:`, err);
+bot.catch((err) => {
+  console.error('⚠️ Bot error:', err);
 });
 
-// Экспортируем обработчик для Vercel
+// Вспомогательная функция для чтения тела запроса
+function getRawBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk;
+    });
+    req.on('end', () => {
+      resolve(body);
+    });
+    req.on('error', reject);
+  });
+}
+
 module.exports = async (req, res) => {
+  // Разрешаем только POST
+  if (req.method !== 'POST') {
+    res.writeHead(405, { 'Content-Type': 'text/plain' });
+    return res.end('Method Not Allowed');
+  }
+
   try {
-    // Распарсим тело запроса в JSON
-    let body;
-
-    // Если тело пришло как строка — парсим
-    if (typeof req.body === 'string') {
-      body = JSON.parse(req.body);
-    }
-    // Если тело уже объект — используем как есть
-    else if (req.body && typeof req.body === 'object') {
-      body = req.body;
-    }
-    // Если тело пустое или не подходит — возвращаем 400
-    else {
-      console.error('❌ Request body is not a string or object:', req.body);
-      return res.status(400).send('Bad Request: Body must be JSON');
+    // Читаем сырое тело запроса
+    const rawBody = await getRawBody(req);
+    
+    // Парсим JSON
+    let update;
+    try {
+      update = JSON.parse(rawBody);
+    } catch (e) {
+      console.error('❌ Invalid JSON:', rawBody);
+      res.writeHead(400, { 'Content-Type': 'text/plain' });
+      return res.end('Bad Request: Invalid JSON');
     }
 
-    // Передаём распарсенное тело в Telegraf
-    await bot.handleUpdate(body, res);
+    // Передаём обновление в Telegraf
+    await bot.handleUpdate(update, res);
   } catch (error) {
-    console.error('Bot error:', error);
-    res.status(500).send('Internal Server Error');
+    console.error('Handler error:', error);
+    res.writeHead(500, { 'Content-Type': 'text/plain' });
+    res.end('Internal Server Error');
   }
 };
