@@ -41,6 +41,9 @@ const downloadVideoCommand = () => async (ctx: Context) => {
   try {
     await ctx.reply('🔄 Анализирую ссылку и начинаю загрузку видео...');
     
+    // Отправляем сообщение о процессе
+    const progressMsg = await ctx.reply('🔍 Поиск подходящего источника...');
+    
     // Запускаем загрузку видео с обработкой таймаута
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => reject(new Error('Operation timeout after 60 seconds')), 60000); // 60 секунд на всю операцию
@@ -49,6 +52,16 @@ const downloadVideoCommand = () => async (ctx: Context) => {
     const downloadPromise = downloadVideo(url);
     
     const result = await Promise.race([downloadPromise, timeoutPromise]) as VideoDownloadResult;
+    
+    // Удаляем сообщение о процессе
+    try {
+      if (ctx.chat) {
+        await ctx.telegram.deleteMessage(ctx.chat.id, progressMsg.message_id);
+      }
+    } catch (deleteError) {
+      // Игнорируем ошибку удаления, если сообщение уже удалено
+      debug(`Could not delete progress message: ${deleteError}`);
+    }
     
     await sendVideoToUser(ctx, result);
   } catch (error: any) {
@@ -78,6 +91,9 @@ const handleVideoLink = async (ctx: Context) => {
     try {
       await ctx.reply('🔄 Обнаружена ссылка на видео. Начинаю загрузку...');
       
+      // Отправляем сообщение о процессе
+      const progressMsg = await ctx.reply('🔍 Поиск подходящего источника...');
+      
       // Запускаем загрузку видео с обработкой таймаута
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Operation timeout after 60 seconds')), 60000); // 60 секунд на всю операцию
@@ -86,6 +102,16 @@ const handleVideoLink = async (ctx: Context) => {
       const downloadPromise = downloadVideo(url);
       
       const result = await Promise.race([downloadPromise, timeoutPromise]) as VideoDownloadResult;
+      
+      // Удаляем сообщение о процессе
+      try {
+        if (ctx.chat) {
+          await ctx.telegram.deleteMessage(ctx.chat.id, progressMsg.message_id);
+        }
+      } catch (deleteError) {
+        // Игнорируем ошибку удаления, если сообщение уже удалено
+        debug(`Could not delete progress message: ${deleteError}`);
+      }
       
       await sendVideoToUser(ctx, result);
     } catch (error: any) {
