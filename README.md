@@ -6,6 +6,14 @@ This template inspired by [Telegram Bot Boilerplate](https://github.com/yakovlev
 
 [![Live Demo](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@7rodma/deploy-a-serverless-telegram-chatbot-using-vercel-57665d942a58)
 
+## Features
+
+- Basic Telegram bot functionality
+- Support for commands
+- Download videos from YouTube, Instagram, and TikTok
+- Automatic link detection in messages
+- Error handling and user notifications
+
 ## Before you start
 
 First rename `.env-sample` file to `.env` and fill in all necessary values.
@@ -20,6 +28,16 @@ BOT_TOKEN="<YOUR_BOT_API_TOKEN>"
 yarn
 yarn dev
 ```
+
+## Usage
+
+The bot supports the following functionality:
+
+### Video Download Feature
+- Send `/download_video <link>` command to download videos from YouTube, Instagram, or TikTok
+- Simply send a video link in any message and the bot will automatically detect and download it
+- Supported platforms: YouTube, Instagram, TikTok
+- Maximum file size: 50MB (Telegram limitation)
 
 ## Production
 
