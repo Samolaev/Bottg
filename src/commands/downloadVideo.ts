@@ -1,6 +1,6 @@
 import { Context } from 'telegraf';
 import createDebug from 'debug';
-import { downloadVideo, sendVideoToUser, detectPlatform } from '../utils/videoDownloader';
+import { downloadVideo, sendVideoToUser, detectPlatform, VideoDownloadResult } from '../utils/videoDownloader';
 
 const debug = createDebug('bot:downloadVideo_command');
 
@@ -41,12 +41,19 @@ const downloadVideoCommand = () => async (ctx: Context) => {
   try {
     await ctx.reply('🔄 Анализирую ссылку и начинаю загрузку видео...');
     
-    const result = await downloadVideo(url);
+    // Запускаем загрузку видео с обработкой таймаута
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout after 60 seconds')), 60000); // 60 секунд на всю операцию
+    });
+    
+    const downloadPromise = downloadVideo(url);
+    
+    const result = await Promise.race([downloadPromise, timeoutPromise]) as VideoDownloadResult;
     
     await sendVideoToUser(ctx, result);
   } catch (error: any) {
     debug(`Error downloading video: ${error.message}`);
-    await ctx.reply(`❌ Произошла ошибка при загрузке видео: ${error.message}`);
+    await ctx.reply(`❌ Произошла ошибка при загрузке видео: ${error.message || 'Operation timed out'}`);
   }
 };
 
@@ -71,12 +78,19 @@ const handleVideoLink = async (ctx: Context) => {
     try {
       await ctx.reply('🔄 Обнаружена ссылка на видео. Начинаю загрузку...');
       
-      const result = await downloadVideo(url);
+      // Запускаем загрузку видео с обработкой таймаута
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Operation timeout after 60 seconds')), 60000); // 60 секунд на всю операцию
+      });
+      
+      const downloadPromise = downloadVideo(url);
+      
+      const result = await Promise.race([downloadPromise, timeoutPromise]) as VideoDownloadResult;
       
       await sendVideoToUser(ctx, result);
     } catch (error: any) {
       debug(`Error downloading video from link: ${error.message}`);
-      await ctx.reply(`❌ Произошла ошибка при загрузке видео: ${error.message}`);
+      await ctx.reply(`❌ Произошла ошибка при загрузке видео: ${error.message || 'Operation timed out'}`);
     }
   }
 };

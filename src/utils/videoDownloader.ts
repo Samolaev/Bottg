@@ -209,12 +209,21 @@ export async function downloadVideo(url: string): Promise<VideoDownloadResult> {
 
   for (const method of methods) {
     try {
-      const result = await method();
+      // Устанавливаем таймаут для каждого метода
+      const timeoutPromise = new Promise<VideoDownloadResult>((_, reject) => {
+        setTimeout(() => reject(new Error('Method timeout')), 30000); // 30 секунд на каждый метод
+      });
+      
+      const methodPromise = method();
+      
+      // Ждем выполнения метода или таймаута
+      const result = await Promise.race([methodPromise, timeoutPromise]);
+      
       if (result.success) {
         return result;
       }
-    } catch (error) {
-      debug(`Method failed: ${error}`);
+    } catch (error: any) {
+      debug(`Method failed: ${error.message}`);
       continue;
     }
   }
