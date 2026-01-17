@@ -43,9 +43,9 @@ The bot supports the following functionality:
 - Provides manual download instructions when automatic download fails
 
 #### Supported URL formats:
-- **YouTube**: `https://www.youtube.com/watch?v=...`, `https://youtu.be/...`, `https://www.youtube.com/embed/...`
-- **Instagram**: `https://www.instagram.com/p/...`, `https://instagr.am/p/...`
-- **TikTok**: `https://www.tiktok.com/@user/video/...`, `https://vm.tiktok.com/...`
+- **YouTube**: `https://www.youtube.com/watch?v=...`, `https://youtu.be/...`, `https://www.youtube.com/shorts/...`, `https://www.youtube.com/embed/...`
+- **Instagram**: `https://www.instagram.com/p/...`, `https://www.instagram.com/reel/...`, `https://instagr.am/p/...`
+- **TikTok**: `https://www.tiktok.com/@user/video/...`, `https://vm.tiktok.com/...`, `https://vt.tiktok.com/...`
 
 #### Fallback behavior:
 When automatic download fails, the bot provides helpful instructions for manual download using trusted websites like cobalt.tools, savefrom.net, and ssstik.io.

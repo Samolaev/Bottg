@@ -68,13 +68,16 @@
 ### YouTube
 - `https://www.youtube.com/watch?v=VIDEO_ID`
 - `https://youtu.be/VIDEO_ID`
+- `https://www.youtube.com/shorts/VIDEO_ID` (YouTube Shorts)
 - `https://www.youtube.com/embed/VIDEO_ID`
 - `https://www.youtube.com/v/VIDEO_ID`
 
 ### Instagram
 - `https://www.instagram.com/p/POST_ID/`
+- `https://www.instagram.com/reel/REEL_ID/` (Instagram Reels)
 - `https://instagr.am/p/POST_ID/`
 
 ### TikTok
 - `https://www.tiktok.com/@user/video/VIDEO_ID`
 - `https://vm.tiktok.com/VIDEO_CODE/`
+- `https://vt.tiktok.com/VIDEO_CODE/` (короткие ссылки)

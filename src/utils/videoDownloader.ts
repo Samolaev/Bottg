@@ -20,7 +20,7 @@ export function detectPlatform(url: string): string | null {
   const lowerUrl = url.toLowerCase();
   if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be')) return 'youtube';
   if (lowerUrl.includes('instagram.com') || lowerUrl.includes('instagr.am')) return 'instagram';
-  if (lowerUrl.includes('tiktok.com') || lowerUrl.includes('vm.tiktok.com')) return 'tiktok';
+  if (lowerUrl.includes('tiktok.com') || lowerUrl.includes('vm.tiktok.com') || lowerUrl.includes('vt.tiktok.com')) return 'tiktok';
   return null;
 }
 
@@ -163,7 +163,7 @@ export async function downloadFromTikTok(url: string): Promise<VideoDownloadResu
     return {
       success: false,
       platform: 'tiktok',
-      fallbackMessage: `📹 Не удалось скачать видео.\n\n👉 Перейдите на https://ssstik.io/\nВставьте ссылку и нажмите "Save TikTok"`
+      fallbackMessage: `📹 Не удалось скачать видео автоматически.\n\n👉 Перейдите на https://ssstik.io/\nВставьте ссылку: ${url}\nНажмите "Save TikTok"`
     };
 
   } catch (error: any) {
@@ -214,16 +214,27 @@ export async function downloadFromInstagram(url: string): Promise<VideoDownloadR
   }
 }
 
-// Извлечение YouTube ID
+// Извлечение YouTube ID (улучшенная версия)
 function extractYouTubeId(url: string): string | null {
+  // Очищаем URL от пробелов и декодируем
+  const cleanUrl = url.trim();
+
   const patterns = [
     /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
     /youtube\.com\/embed\/([^&\n?#]+)/,
-    /youtube\.com\/v\/([^&\n?#]+)/
+    /youtube\.com\/v\/([^&\n?#]+)/,
+    /youtube\.com\/shorts\/([^&\n?#]+)(?:\?|$)/
   ];
+
   for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match?.[1]) return match[1];
+    const match = cleanUrl.match(pattern);
+    if (match?.[1]) {
+      const videoId = match[1];
+      // Проверяем валидность ID (5–11 символов, только буквы, цифры, дефисы и подчеркивания)
+      if (/^[a-zA-Z0-9_-]{5,11}$/.test(videoId)) {
+        return videoId;
+      }
+    }
   }
   return null;
 }
@@ -257,33 +268,55 @@ export async function downloadVideo(url: string): Promise<VideoDownloadResult> {
   }
 }
 
-// Отправка пользователю
+// Отправка пользователю (безопасная для Vercel)
 export async function sendVideoToUser(ctx: Context, result: VideoDownloadResult) {
-  if (result.success && result.url) {
-    try {
-      await ctx.reply('📥 Видео готово! Отправляю...');
+  try {
+    if (result.success && result.url) {
+      try {
+        await ctx.reply('📥 Видео готово! Отправляю...');
+      } catch (e) {
+        debug('Failed to send initial message');
+        return;
+      }
 
       // Проверка размера (опционально)
       try {
         const head = await axios.head(result.url, { timeout: 5000 });
         const size = parseInt(head.headers['content-length'] || '0');
         if (size > 50 * 1024 * 1024) { // >50 MB
-          await ctx.reply(`⚠️ Видео слишком большое (${(size / (1024 * 1024)).toFixed(1)} MB).\nСкачайте по ссылке: ${result.url}`);
+          try {
+            await ctx.reply(`⚠️ Видео слишком большое (${(size / (1024 * 1024)).toFixed(1)} MB).\nСкачайте по ссылке: ${result.url}`);
+          } catch (e) {
+            debug('Failed to send size warning');
+          }
           return;
         }
       } catch (e) {
         debug('Could not check file size');
       }
 
-      await ctx.replyWithVideo({ url: result.url }, {
-        caption: `📹 Видео с ${result.platform || 'платформы'}`
-      });
-    } catch (e) {
-      debug('Failed to send video directly');
-      await ctx.reply(`✅ Найдено видео!\nСкачайте по ссылке: ${result.url}`);
+      try {
+        await ctx.replyWithVideo({ url: result.url }, {
+          caption: `📹 Видео с ${result.platform || 'платформы'}`
+        });
+      } catch (e) {
+        debug('Failed to send video directly');
+        try {
+          await ctx.reply(`✅ Найдено видео!\nСкачайте по ссылке: ${result.url}`);
+        } catch (e) {
+          debug('Failed to send fallback message');
+        }
+      }
+    } else {
+      const msg = result.fallbackMessage || `❌ ${result.error || 'Не удалось обработать ссылку.'}`;
+      try {
+        await ctx.reply(msg);
+      } catch (e) {
+        debug('Failed to send error message');
+      }
     }
-  } else {
-    const msg = result.fallbackMessage || `❌ ${result.error || 'Не удалось обработать ссылку.'}`;
-    await ctx.reply(msg);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    debug(`Unexpected error in sendVideoToUser: ${errorMessage}`);
   }
 }
