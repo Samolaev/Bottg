@@ -1,5 +1,11 @@
 {
+  "name": "bottg",
+  "version": "1.0.0",
   "type": "module",
-  "dependencies": { "telegraf": "^4.16.0" },
-  "engines": { "node": "24.x" }
+  "dependencies": {
+    "telegraf": "^4.16.0"
+  },
+  "engines": {
+    "node": "24.x"
+  }
 }
