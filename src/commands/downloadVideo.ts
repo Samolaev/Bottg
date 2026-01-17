@@ -46,7 +46,7 @@ const downloadVideoCommand = () => async (ctx: Context) => {
     
     // Запускаем загрузку видео с обработкой таймаута
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Operation timeout after 60 seconds')), 60000); // 60 секунд на всю операцию
+      setTimeout(() => reject(new Error('Operation timeout after 45 seconds')), 45000); // 45 секунд на всю операцию
     });
     
     const downloadPromise = downloadVideo(url);
@@ -96,7 +96,7 @@ const handleVideoLink = async (ctx: Context) => {
       
       // Запускаем загрузку видео с обработкой таймаута
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Operation timeout after 60 seconds')), 60000); // 60 секунд на всю операцию
+        setTimeout(() => reject(new Error('Operation timeout after 45 seconds')), 45000); // 45 секунд на всю операцию
       });
       
       const downloadPromise = downloadVideo(url);
