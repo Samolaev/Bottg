@@ -1,7 +1,7 @@
 import asyncio
 import json
 from django.http import HttpResponse
-from ..api.bot import bot_tele
+from .bot import bot_tele
 
 def index(request):
     if request.method == 'POST':
