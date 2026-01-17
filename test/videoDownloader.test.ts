@@ -1,4 +1,4 @@
-import { detectPlatform, downloadVideo } from '../src/utils/videoDownloader';
+import { detectPlatform } from '../src/utils/videoDownloader';
 
 // Простой тест для проверки работы функций
 console.log('Testing video downloader functionality...\n');
@@ -36,14 +36,10 @@ youtubeUrls.forEach(url => {
       /youtube\.com\/embed\/([^&\n?#]+)/,
       /youtube\.com\/v\/([^&\n?#]+)/
     ];
-
     for (const pattern of patterns) {
       const match = url.match(pattern);
-      if (match && match[1]) {
-        return match[1];
-      }
+      if (match?.[1]) return match[1];
     }
-
     return null;
   };
 
@@ -55,3 +51,4 @@ console.log('\nTesting completed.');
 
 // Для полного тестирования загрузки видео нужно запустить бота
 console.log('\nTo fully test video downloading functionality, run the bot and send video links.');
+console.log('Note: Actual video downloading requires working external APIs and may fail in test environment.');

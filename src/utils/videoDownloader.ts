@@ -24,7 +24,7 @@ export function detectPlatform(url: string): string | null {
   return null;
 }
 
-// Вспомогательная функция: безопасный запрос с retry
+// Вспомогательная функция: безопасный GET запрос с retry
 async function fetchWithRetry<T>(
   url: string,
   options: any = {},
@@ -47,7 +47,40 @@ async function fetchWithRetry<T>(
       return response.data as T;
     } catch (error: any) {
       lastError = error;
-      debug(`Attempt ${i + 1} failed: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      debug(`Attempt ${i + 1} failed: ${errorMessage}`);
+      if (i < retries) await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+  throw lastError;
+}
+
+// Вспомогательная функция: безопасный POST запрос с retry
+async function postWithRetry<T>(
+  url: string,
+  data: any,
+  options: any = {},
+  retries = 2,
+  delayMs = 2000
+): Promise<T> {
+  let lastError: any;
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const response = await axios.post(url, data, {
+        timeout: 30000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36',
+          'Accept': 'application/json, text/plain, */*',
+          'Content-Type': 'application/json',
+          ...options.headers
+        },
+        ...options
+      });
+      return response.data as T;
+    } catch (error: any) {
+      lastError = error;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      debug(`POST attempt ${i + 1} failed: ${errorMessage}`);
       if (i < retries) await new Promise(r => setTimeout(r, delayMs));
     }
   }
@@ -64,18 +97,11 @@ export async function downloadFromYouTube(url: string): Promise<VideoDownloadRes
 
     // Альтернатива 1: cobalt.tools (открытый, без водяных знаков, работает из Vercel)
     try {
-      const cobaltResponse = await fetchWithRetry<any>(
+      const cobaltResponse = await postWithRetry<any>(
         `https://api.cobalt.tools/api/json`,
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          data: JSON.stringify({
-            url: `https://www.youtube.com/watch?v=${videoId}`,
-            downloadMode: "audio+video"
-          })
+          url: `https://www.youtube.com/watch?v=${videoId}`,
+          downloadMode: "audio+video"
         }
       );
 
@@ -87,8 +113,9 @@ export async function downloadFromYouTube(url: string): Promise<VideoDownloadRes
           filename: `youtube_${videoId}.mp4`
         };
       }
-    } catch (e) {
-      debug('Cobalt failed:', e.message);
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+      debug('Cobalt failed:', errorMessage);
     }
 
     // Fallback: дать ссылку на сайт
@@ -127,8 +154,9 @@ export async function downloadFromTikTok(url: string): Promise<VideoDownloadResu
           filename: 'tiktok_video.mp4'
         };
       }
-    } catch (e) {
-      debug('ssstik.io failed:', e.message);
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+      debug('ssstik.io failed:', errorMessage);
     }
 
     // Fallback: инструкция
@@ -164,8 +192,9 @@ export async function downloadFromInstagram(url: string): Promise<VideoDownloadR
           filename: 'instagram_video.mp4'
         };
       }
-    } catch (e) {
-      debug('Instagram API failed:', e.message);
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+      debug('Instagram API failed:', errorMessage);
     }
 
     // Fallback: инструкция

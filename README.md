@@ -39,12 +39,16 @@ The bot supports the following functionality:
 - Simply send a video link in any message and the bot will automatically detect and download it
 - Supported platforms: YouTube, Instagram, TikTok
 - Maximum file size: 50MB (Telegram limitation)
-- Uses specialized APIs for each platform for reliable downloads
+- Uses specialized APIs for each platform with fallback options
+- Provides manual download instructions when automatic download fails
 
 #### Supported URL formats:
-- **YouTube**: `https://www.youtube.com/watch?v=...`, `https://youtu.be/...`
-- **Instagram**: `https://www.instagram.com/p/...`
+- **YouTube**: `https://www.youtube.com/watch?v=...`, `https://youtu.be/...`, `https://www.youtube.com/embed/...`
+- **Instagram**: `https://www.instagram.com/p/...`, `https://instagr.am/p/...`
 - **TikTok**: `https://www.tiktok.com/@user/video/...`, `https://vm.tiktok.com/...`
+
+#### Fallback behavior:
+When automatic download fails, the bot provides helpful instructions for manual download using trusted websites like cobalt.tools, savefrom.net, and ssstik.io.
 
 ## Production
 
